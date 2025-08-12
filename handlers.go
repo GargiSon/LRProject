@@ -8,8 +8,10 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -129,7 +131,11 @@ func validateToken(token string) bool {
 	url := "https://api.loginradius.com/identity/v2/auth/access_token/validate?apikey=" + apiKey + "&access_token=" + token
 
 	resp, err := http.Get(url)
-	if err != nil || resp.StatusCode != http.StatusOK {
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
 		return false
 	}
 	return true
@@ -152,18 +158,22 @@ func forgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	email := strings.ToLower(r.FormValue("email"))
+	if email == "" {
+		http.Error(w, "Email is required", http.StatusBadRequest)
+		return
+	}
+
 	apiKey := os.Getenv("LOGINRADIUS_API_KEY")
-
 	resetURL := os.Getenv("RESET_PASSWORD_URL")
+	emailTemplate := os.Getenv("EMAIL_TEMPLATE")
 
-	if resetURL == "" {
-		http.Error(w, "Reset URL is not configured", http.StatusInternalServerError)
+	if apiKey == "" || resetURL == "" {
+		http.Error(w, "Server configuration missing", http.StatusInternalServerError)
 		return
 	}
 
 	payload := map[string]string{
-		"email":            email,
-		"resetPasswordUrl": resetURL,
+		"email": email,
 	}
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
@@ -171,8 +181,13 @@ func forgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url := "https://api.loginradius.com/identity/v2/auth/password?apikey=" + apiKey
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	apiEndpoint := "https://api.loginradius.com/identity/v2/auth/password"
+	apiReqURL := fmt.Sprintf("%s?apikey=%s&resetPasswordUrl=%s&emailTemplate=%s", apiEndpoint, apiKey, url.QueryEscape(resetURL), emailTemplate)
+	if emailTemplate != "" {
+		apiReqURL += "&emailTemplate=" + url.QueryEscape(emailTemplate)
+	}
+
+	resp, err := http.Post(apiReqURL, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		http.Error(w, "Failed to send reset request", http.StatusInternalServerError)
 		return
@@ -185,22 +200,55 @@ func forgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.ServeFile(w, r, "static/reset.html")
+	w.Header().Set("Content-Type", "text/plain; chatset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("If an account exists for that email, a password reset link has been sent."))
 }
 
 func resetPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		http.ServeFile(w, r, "static/reset.html")
+		token := r.URL.Query().Get("vtoken")
+		if token == "" {
+			token = r.URL.Query().Get("token")
+		}
+		if token == "" {
+			http.Error(w, "Invalid or missing reset token", http.StatusBadRequest)
+			return
+		}
+
+		tmpl, err := template.ParseFiles("static/reset.html")
+		if err != nil {
+			http.Error(w, "Failed to load reset page", http.StatusInternalServerError)
+			return
+		}
+		tmpl.Execute(w, map[string]string{"Token": token})
 		return
 	}
 
 	token := r.FormValue("token")
+	if token == "" {
+		token = r.FormValue("vtoken")
+	}
 	newPassword := r.FormValue("password")
 	confirmPassword := r.FormValue("confirmPassword")
-	apiKey := os.Getenv("LOGINRADIUS_API_KEY")
+
+	if token == "" {
+		http.Error(w, "Missing reset token", http.StatusBadRequest)
+	}
+
+	if newPassword == "" || confirmPassword == "" {
+		http.Error(w, "Password fields cannot be empty", http.StatusBadRequest)
+		return
+	}
 
 	if newPassword != confirmPassword {
 		http.Error(w, "Passwords do not match", http.StatusBadRequest)
+		return
+	}
+
+	apiKey := os.Getenv("LOGINRADIUS_API_KEY")
+	if apiKey == "" {
+		http.Error(w, "Server configuration missing", http.StatusInternalServerError)
 		return
 	}
 
@@ -234,9 +282,10 @@ func resetPasswordHandler(w http.ResponseWriter, r *http.Request) {
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		http.Error(w, "Error: "+string(body), http.StatusBadRequest)
+		log.Printf("Password reset error: %s", string(body))
+		http.Error(w, "Password reset failed. The link may be expired or invalid.", http.StatusBadRequest)
 		return
 	}
 
-	http.ServeFile(w, r, "static/login.html")
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
