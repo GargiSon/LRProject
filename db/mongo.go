@@ -1,40 +1,37 @@
-package main
+package db
 
 import (
 	"context"
 	"log"
-	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"LRProject3/config"
 )
 
-var client *mongo.Client
-var sessionCollection *mongo.Collection
+var Client *mongo.Client
+var SessionCollection *mongo.Collection
 
-func connectMongo() {
+func ConnectMongo() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	mongoURI := os.Getenv("MONGO_URI")
-	if mongoURI == "" {
-		log.Fatal("MONGO_URI environment variable not set")
-	}
-
+	mongoURI := config.GetEnv("MONGO_URI")
 	var err error
-	client, err = mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
+	Client, err = mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
 	if err != nil {
 		log.Fatal(err)
 	}
-	sessionCollection = client.Database("LRProject3").Collection("sessions")
+	SessionCollection = Client.Database("LRProject3").Collection("sessions")
 	log.Println("Connected to MongoDB and session collection initialized")
 }
 
-func saveSession(sessionID, token string) {
+func SaveSession(sessionID, token string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	_, err := sessionCollection.InsertOne(ctx, map[string]any{
+	_, err := SessionCollection.InsertOne(ctx, map[string]any{
 		"session_id":   sessionID,
 		"access_token": token,
 		"expires_at":   time.Now().Add(24 * time.Hour),
@@ -44,11 +41,11 @@ func saveSession(sessionID, token string) {
 	}
 }
 
-func getSessionToken(sessionID string) string {
+func GetSessionToken(sessionID string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	var result map[string]any
-	err := sessionCollection.FindOne(ctx, map[string]any{"session_id": sessionID}).Decode(&result)
+	err := SessionCollection.FindOne(ctx, map[string]any{"session_id": sessionID}).Decode(&result)
 	if err != nil {
 		log.Println("Error fetching session token:", err)
 		return ""
@@ -56,10 +53,10 @@ func getSessionToken(sessionID string) string {
 	return result["access_token"].(string)
 }
 
-func deleteSession(sessionID string) {
+func DeleteSession(sessionID string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	_, err := sessionCollection.DeleteOne(ctx, map[string]interface{}{"session_id": sessionID})
+	_, err := SessionCollection.DeleteOne(ctx, map[string]any{"session_id": sessionID})
 	if err != nil {
 		log.Println("Error deleting session:", err)
 	}
