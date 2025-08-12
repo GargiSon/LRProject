@@ -144,3 +144,99 @@ func randomString(n int) string {
 	}
 	return string(b)
 }
+
+func forgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		http.ServeFile(w, r, "static/forgot.html")
+		return
+	}
+
+	email := strings.ToLower(r.FormValue("email"))
+	apiKey := os.Getenv("LOGINRADIUS_API_KEY")
+
+	resetURL := os.Getenv("RESET_PASSWORD_URL")
+
+	if resetURL == "" {
+		http.Error(w, "Reset URL is not configured", http.StatusInternalServerError)
+		return
+	}
+
+	payload := map[string]string{
+		"email":            email,
+		"resetPasswordUrl": resetURL,
+	}
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		http.Error(w, "Failed to prepare request", http.StatusInternalServerError)
+		return
+	}
+
+	url := "https://api.loginradius.com/identity/v2/auth/password?apikey=" + apiKey
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		http.Error(w, "Failed to send reset request", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		http.Error(w, "Error: "+string(body), http.StatusBadRequest)
+		return
+	}
+
+	http.ServeFile(w, r, "static/reset.html")
+}
+
+func resetPasswordHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		http.ServeFile(w, r, "static/reset.html")
+		return
+	}
+
+	token := r.FormValue("token")
+	newPassword := r.FormValue("password")
+	confirmPassword := r.FormValue("confirmPassword")
+	apiKey := os.Getenv("LOGINRADIUS_API_KEY")
+
+	if newPassword != confirmPassword {
+		http.Error(w, "Passwords do not match", http.StatusBadRequest)
+		return
+	}
+
+	payload := map[string]string{
+		"resetToken": token,
+		"password":   newPassword,
+	}
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		http.Error(w, "Failed to prepare request", http.StatusInternalServerError)
+		return
+	}
+
+	req, err := http.NewRequest("PUT",
+		"https://api.loginradius.com/identity/v2/auth/password/reset?apikey="+apiKey,
+		bytes.NewBuffer(jsonData),
+	)
+	if err != nil {
+		http.Error(w, "Failed to create request", http.StatusInternalServerError)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		http.Error(w, "Failed to reset password", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		http.Error(w, "Error: "+string(body), http.StatusBadRequest)
+		return
+	}
+
+	http.ServeFile(w, r, "static/login.html")
+}

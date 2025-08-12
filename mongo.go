@@ -28,6 +28,7 @@ func connectMongo() {
 		log.Fatal(err)
 	}
 	sessionCollection = client.Database("LRProject3").Collection("sessions")
+	log.Println("Connected to MongoDB and session collection initialized")
 }
 
 func saveSession(sessionID, token string) {
@@ -49,6 +50,7 @@ func getSessionToken(sessionID string) string {
 	var result map[string]any
 	err := sessionCollection.FindOne(ctx, map[string]any{"session_id": sessionID}).Decode(&result)
 	if err != nil {
+		log.Println("Error fetching session token:", err)
 		return ""
 	}
 	return result["access_token"].(string)
@@ -57,5 +59,8 @@ func getSessionToken(sessionID string) string {
 func deleteSession(sessionID string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	_, _ = sessionCollection.DeleteOne(ctx, map[string]any{"session_id": sessionID})
+	_, err := sessionCollection.DeleteOne(ctx, map[string]interface{}{"session_id": sessionID})
+	if err != nil {
+		log.Println("Error deleting session:", err)
+	}
 }
