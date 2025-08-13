@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"LRProject3/config"
-	"LRProject3/db"
 	"LRProject3/utils"
 )
 
@@ -61,7 +60,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(data, &lrResp)
 
 	sessionID := utils.RandomString(32)
-	db.SaveSession(sessionID, lrResp.AccessToken)
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_id",
@@ -74,26 +72,18 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	if c, err := r.Cookie("session_id"); err == nil {
-		db.DeleteSession(c.Value)
-	}
 	http.SetCookie(w, &http.Cookie{Name: "session_id", Value: "", Path: "/", MaxAge: -1})
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		c, err := r.Cookie("session_id")
+		_, err := r.Cookie("session_id")
 		if err != nil {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 
-		token := db.GetSessionToken(c.Value)
-		if token == "" || !ValidateToken(token) {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
 		next(w, r)
 	}
 }

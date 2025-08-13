@@ -5,13 +5,11 @@ import (
 	"net/http"
 
 	"LRProject3/config"
-	"LRProject3/db"
 	"LRProject3/handlers"
 )
 
 func main() {
 	config.LoadEnv()
-	db.ConnectMongo()
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	http.HandleFunc("/register", handlers.RegisterHandler)
