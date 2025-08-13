@@ -14,6 +14,7 @@ func main() {
 	db.ConnectMongo()
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	http.HandleFunc("/register", handlers.RegisterHandler)
 	http.HandleFunc("/login", handlers.LoginHandler)
 	http.HandleFunc("/logout", handlers.LogoutHandler)
 	http.HandleFunc("/home", handlers.AuthMiddleware(handlers.HomeHandler))
