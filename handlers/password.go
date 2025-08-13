@@ -55,7 +55,7 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("If an account exists for that email, a password reset link has been sent."))
+	w.Write([]byte("If an account exists, a password link has been sent."))
 }
 
 func ResetPasswordHandler(w http.ResponseWriter, r *http.Request) {

@@ -37,6 +37,23 @@ input[type="password"] {
     border-radius: 6px;
 }
 
+.login-header{
+    text-align: center;
+}
+
+.form-links {
+    margin-top: 4px;
+    text-align: left;
+}
+
+.form-links a {
+    font-size: 12px;
+}
+
+.form-links a:hover {
+    text-decoration: underline;
+}
+
 button {
     width: 100%;
     padding: 12px;
