@@ -9,19 +9,9 @@ import (
 	"net/url"
 
 	"LRProject3/config"
+	"LRProject3/models"
 	"LRProject3/utils"
 )
-
-type lrRegisterResponse struct {
-	Uid       string `json:"Uid"`
-	FirstName string `json:"FirstName"`
-	LastName  string `json:"LastName"`
-}
-
-type sottResponse struct {
-	Sott           string `json:"Sott"`
-	ExpirationTime string `json:"ExpirationTime"`
-}
 
 func apiHost() string {
 	h := config.GetEnv("LOGINRADIUS_API_DOMAIN")
@@ -39,7 +29,6 @@ func getSOTT() (string, error) {
 		return "", fmt.Errorf("LOGINRADIUS_API_KEY or LOGINRADIUS_API_SECRET not set")
 	}
 
-	// Use correct param casing and URL-encode values
 	q := url.Values{}
 	q.Set("apiKey", apiKey)
 	q.Set("apiSecret", apiSecret)
@@ -58,7 +47,7 @@ func getSOTT() (string, error) {
 		return "", fmt.Errorf("failed to get SOTT (%d): %s", resp.StatusCode, string(body))
 	}
 
-	var data sottResponse
+	var data models.SottResponse
 	if err := json.Unmarshal(body, &data); err != nil {
 		return "", fmt.Errorf("decode SOTT response failed: %w", err)
 	}
@@ -148,7 +137,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var ok lrRegisterResponse
+		var ok models.LrRegisterResponse
 		_ = json.Unmarshal(respBytes, &ok)
 
 		w.Header().Set("Content-Type", "application/json")

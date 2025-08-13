@@ -9,12 +9,9 @@ import (
 	"strings"
 
 	"LRProject3/config"
+	"LRProject3/models"
 	"LRProject3/utils"
 )
-
-type LoginResponse struct {
-	AccessToken string `json:"access_token"`
-}
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
@@ -55,7 +52,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var lrResp LoginResponse
+	var lrResp models.LoginResponse
 	data, _ := io.ReadAll(resp.Body)
 	json.Unmarshal(data, &lrResp)
 
