@@ -16,7 +16,7 @@ import (
 func apiHost() string {
 	h := config.GetEnv("LOGINRADIUS_API_DOMAIN")
 	if h == "" {
-		h = "api.loginradius.com"
+		h = "devapi.lrinternal.com"
 	}
 	return h
 }
@@ -32,7 +32,7 @@ func getSOTT() (string, error) {
 	q := url.Values{}
 	q.Set("apiKey", apiKey)
 	q.Set("apiSecret", apiSecret)
-	q.Set("timeDifference", "10") // minutes; keep small so SOTT doesn't expire
+	q.Set("timeDifference", "10")
 
 	sottURL := fmt.Sprintf("https://%s/identity/v2/manage/account/sott?%s", apiHost(), q.Encode())
 
@@ -59,10 +59,12 @@ func getSOTT() (string, error) {
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	utils.SetNoCacheHeaders(w)
+	w.Header().Set("Content-Type", "application/json")
 
 	switch r.Method {
 	case http.MethodGet:
-		http.ServeFile(w, r, "static/register.html")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		_ = json.NewEncoder(w).Encode(map[string]string{"error": "Method not allowed"})
 		return
 
 	case http.MethodPost:

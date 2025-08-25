@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"io"
 	"log"
 	"net/http"
@@ -17,7 +16,7 @@ import (
 
 func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		http.ServeFile(w, r, "static/forgot.html")
+		http.Error(w, "GET method not supported for forgot password", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -34,7 +33,7 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	payload := map[string]string{"email": email}
 	jsonData, _ := json.Marshal(payload)
 
-	apiEndpoint := "https://api.loginradius.com/identity/v2/auth/password"
+	apiEndpoint := "https://devapi.lrinternal.com/identity/v2/auth/password"
 	apiReqURL := fmt.Sprintf("%s?apikey=%s&resetPasswordUrl=%s", apiEndpoint, apiKey, url.QueryEscape(resetURL))
 	if emailTemplate != "" {
 		apiReqURL += "&emailTemplate=" + url.QueryEscape(emailTemplate)
@@ -65,16 +64,14 @@ func ResetPasswordHandler(w http.ResponseWriter, r *http.Request) {
 			token = r.URL.Query().Get("token")
 		}
 		if token == "" {
-			http.Error(w, "Invalid or missing reset token", http.StatusBadRequest)
+			http.Error(w, "Missing reset token", http.StatusBadRequest)
 			return
 		}
 
-		tmpl, err := template.ParseFiles("static/reset.html")
-		if err != nil {
-			http.Error(w, "Failed to load reset page", http.StatusInternalServerError)
-			return
-		}
-		tmpl.Execute(w, map[string]string{"Token": token})
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{
+			"token": token,
+		})
 		return
 	}
 
@@ -106,7 +103,7 @@ func ResetPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	jsonData, _ := json.Marshal(payload)
 
 	req, _ := http.NewRequest("PUT",
-		"https://api.loginradius.com/identity/v2/auth/password/reset?apikey="+apiKey,
+		"https://devapi.lrinternal.com/identity/v2/auth/password/reset?apikey="+apiKey,
 		bytes.NewBuffer(jsonData),
 	)
 	req.Header.Set("Content-Type", "application/json")
@@ -126,5 +123,8 @@ func ResetPasswordHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Password reset successful",
+	})
 }

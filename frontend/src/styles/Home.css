@@ -1,0 +1,17 @@
+.home-container {
+  text-align: center;
+  margin-top: 50px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.logout-link {
+  display: inline-block;
+  margin-top: 20px;
+  text-decoration: none;
+  color: #007bff;
+  font-weight: bold;
+}
+
+.logout-link:hover {
+  text-decoration: underline;
+}
