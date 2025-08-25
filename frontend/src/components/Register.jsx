@@ -31,7 +31,7 @@ const Register = () => {
         setMsg(data.Description || data.message || 'Registration failed');
         setMsgClass('msg error');
       } else {
-        setMsg('Success! Account created. UID: ' + (data.uid || ''));
+        setMsg('Success! Account created');
         setMsgClass('msg success');
         e.target.reset();
       }
