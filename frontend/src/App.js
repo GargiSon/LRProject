@@ -7,6 +7,8 @@ import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from "./components/ResetPassword";
 import Logout from './components/Logout';
 import ProtectedRoute from './components/ProtectedRoute';
+import Contact from './components/Contact';
+import About from './components/About';
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
         <Route path='/logout' element={<Logout/>} />
         <Route path="/register" element={<Register />} />
         <Route path="/home" element={<ProtectedRoute> <Home/> </ProtectedRoute>} />
+        <Route path="/contact" element={<ProtectedRoute> <Contact/> </ProtectedRoute>} />
+        <Route path="/about" element={<ProtectedRoute> <About/> </ProtectedRoute>} />
         <Route path="/forgot" element={<ForgotPassword />} />
         <Route path="/reset" element={<ResetPassword />} />
       </Routes>

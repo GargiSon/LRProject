@@ -1,26 +1,42 @@
-import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import '../styles/Home.css';
+import React from "react";
+import { Link } from "react-router-dom";
+import logo from "../assets/login.png";
+import boyImage from "../assets/boy.png"; 
+import "../styles/Home.css";
+import backgroundVideo from "../assets/LP5.mp4";
 
 const Home = () => {
-  // useEffect(() => {
-  //   // Reload if coming back from bfcache
-  //   const handlePageShow = (event) => {
-  //     if (event.persisted) {
-  //       window.location.reload();
-  //     }
-  //   };
-
-  //   window.addEventListener('pageshow', handlePageShow);
-  //   return () => {
-  //     window.removeEventListener('pageshow', handlePageShow);
-  //   };
-  // }, []);
-
   return (
     <div className="home-container">
-      <h1>Welcome!</h1>
-      <Link to="/logout" className="logout-link">Logout</Link>
+      <video autoPlay loop muted className="background-video">
+        <source src={backgroundVideo} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+
+      <nav className="navbar">
+        <div className="nav-left">
+          <img src={logo} alt="Skillverse Logo" className="nav-logo" />
+          <span className="nav-title">Skillverse</span>
+        </div>
+
+        <div className="nav-links">
+          <Link to="/home">Home</Link>
+          <Link to="/about">About</Link>
+          <Link to="/you">You</Link>
+          <Link to="/contact">Contact</Link>
+        </div>
+
+        <div className="nav-right">
+          <Link to="/logout" className="logout-btn">Logout</Link>
+        </div>
+      </nav>
+
+      <div className="home-content">
+        <div className="hero-card">
+          <div className="glow-circle"></div>
+          <img src={boyImage} alt="Welcome to Skillverse" className="hero-image" />
+        </div>
+      </div>
     </div>
   );
 };
