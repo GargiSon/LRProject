@@ -3,6 +3,7 @@ import Navbar from "./NavBar.jsx";
 import boyImage from "../assets/boy.png"; 
 import "../styles/Home.css";
 import backgroundVideo from "../assets/LP5.mp4";
+import Footer from "./Footer.jsx";
 
 const Home = () => {
   return (
@@ -20,6 +21,7 @@ const Home = () => {
           <img src={boyImage} alt="Welcome to Skillverse" className="hero-image" />
         </div>
       </div>
+      <Footer/>
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React from "react";
 import "../styles/About.css";
 import Navbar from "./NavBar.jsx"; 
+import Footer from "./Footer.jsx";
 
 const About = () => {
   return (
@@ -83,6 +84,8 @@ const About = () => {
           <button>Get Started</button>
         </section>
       </div>
+
+      <Footer/>
     </>
     
   );

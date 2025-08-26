@@ -1,6 +1,7 @@
 import React from "react";
 import "../styles/Contact.css";
 import Navbar from "./NavBar.jsx"; 
+import Footer from "./Footer.jsx";
 
 const Contact = () => {
   return (
@@ -52,6 +53,8 @@ const Contact = () => {
           </div>
         </div>
       </div> 
+
+      <Footer/>
     </>
   );
 };

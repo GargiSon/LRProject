@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "../styles/Profile.css";
-import Navbar from "./NavBar.jsx"; 
-import illustration from '../assets/Profile.png';
+import Navbar from "./NavBar.jsx";
+import illustration from "../assets/Profile.png";
+import Footer from "./Footer.jsx";
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
@@ -33,23 +34,23 @@ const Profile = () => {
   if (!profile || !profile.FirstName) return <p>No profile data available</p>;
 
   return (
-    <>
+    <div className="profile-page">
       <Navbar />
-      <div className="profile-container">
-        <div className="profile-image">
-          <img
-            src={illustration}
-            alt="Profile"
-          />
-        </div>
+      <main className="profile-main">
+        <div className="profile-container">
+          <div className="profile-image">
+            <img src={illustration} alt="Profile" />
+          </div>
 
-        <div className="profile-details">
-          <p><strong>FirstName:</strong> {profile.FirstName}</p>
-          <p><strong>LastName:</strong> {profile.LastName}</p>
-          <p><strong>Email:</strong> {profile.Email}</p>
+          <div className="profile-details">
+            <p><strong>FirstName:</strong> {profile.FirstName}</p>
+            <p><strong>LastName:</strong> {profile.LastName}</p>
+            <p><strong>Email:</strong> {profile.Email}</p>
+          </div>
         </div>
-      </div>
-    </>
+      </main>
+      <Footer />
+    </div>
   );
 };
 
