@@ -9,6 +9,7 @@ import Logout from './components/Logout';
 import ProtectedRoute from './components/ProtectedRoute';
 import Contact from './components/Contact';
 import About from './components/About';
+import Profile from './components/Profile';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/home" element={<ProtectedRoute> <Home/> </ProtectedRoute>} />
         <Route path="/contact" element={<ProtectedRoute> <Contact/> </ProtectedRoute>} />
         <Route path="/about" element={<ProtectedRoute> <About/> </ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute> <Profile/> </ProtectedRoute>} />
         <Route path="/forgot" element={<ForgotPassword />} />
         <Route path="/reset" element={<ResetPassword />} />
       </Routes>

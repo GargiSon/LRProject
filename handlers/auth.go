@@ -92,10 +92,9 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		logoutURL := "https://devapi.lrinternal.com/identity/v2/auth/access_token/invalidate?apikey=" + apiKey + "&access_token=" + cookie.Value
 
 		client := &http.Client{}
-		_, _ = client.Get(logoutURL) // We ignore the error here but you can log it
+		_, _ = client.Get(logoutURL)
 	}
 
-	// Clear cookie from browser
 	http.SetCookie(w, &http.Cookie{
 		Name:     "lr_token",
 		Value:    "",

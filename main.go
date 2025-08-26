@@ -16,6 +16,7 @@ func main() {
 	http.HandleFunc("/login", handlers.LoginHandler)
 	http.HandleFunc("/logout", handlers.LogoutHandler)
 	http.HandleFunc("/home", handlers.AuthMiddleware(handlers.HomeHandler))
+	http.HandleFunc("/api/profile", handlers.AuthMiddleware(handlers.ProfileHandler))
 	http.HandleFunc("/forgot", handlers.ForgotPasswordHandler)
 	http.HandleFunc("/reset", handlers.ResetPasswordHandler)
 
