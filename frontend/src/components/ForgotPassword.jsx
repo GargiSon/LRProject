@@ -16,7 +16,7 @@ const ForgotPassword = () => {
     try {
       const res = await fetch('/forgot', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },  //Because go will accept email in this form only
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({ email })
       });
 
