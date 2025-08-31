@@ -1,0 +1,31 @@
+Login (Frontend; User-facing, safe with API key)
+https://devapi.lrinternal.com/identity/v2/auth/login?apikey=
+
+Logout (Frontend; Ends session, safe with token)
+https://devapi.lrinternal.com/identity/v2/auth/access_token/invalidate?apikey=
+
+Forgot Password (Frontend; User-facing, triggers email)
+https://devapi.lrinternal.com/identity/v2/auth/password
+
+Reset Password (Frontend; User-facing, uses reset token)
+https://devapi.lrinternal.com/identity/v2/auth/password/reset?apikey=
+
+Register (Frontend + needs SOTT from Backend; Signup requires backend-issued SOTT)
+https://devapi.lrinternal.com/identity/v2/auth/register?apiKey=%s
+
+API Host (For timing) (Used by both (depends on call); But secrets only backend)
+devapi.lrinternal.com
+
+getSOTT (Backend; Requires API secret, never expose)
+https://devapi.lrinternal.com/identity/v2/manage/account/sott?%s
+
+Validate Token (Backend; Security check before serving protected APIs)
+https://devapi.lrinternal.com/identity/v2/auth/access_token/validate?apikey=
+
+Get User Profile (Backend; Protects sensitive user data)
+https://devapi.lrinternal.com/identity/v2/auth/account?apikey=%s&access_token=%s
+
+
+The apikey is like a public identifier
+It’s like your Google Maps API Key — public, but protected by restrictions on LoginRadius’ side.
+
